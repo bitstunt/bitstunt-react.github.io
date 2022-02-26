@@ -1,7 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect } from 'react';
 import './Script.js';
 import './About.css';
-import { debounce } from './Script.js';
 
 function About () {
     const para = " Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt.";
@@ -10,71 +9,46 @@ function About () {
     <div className="count">{item.count}</div>
     <h5>{item.text}</h5>
     </div>)});
-    const [animated, setTruth] = useState([false, false, false]);
-    const animate_counter = () => {
-        let counters = document.querySelectorAll('.count');
-        counters.forEach(element => {
-            const target = parseInt(element.innerText);
-            let count = 0;
-            const updateCount = () => {
-                if (count < target)
+    useEffect(() => {
+        let fadeAnimation = () => {
+            let elements = document.querySelectorAll('.fadeUp');
+            elements.forEach((item) => {
+                if(item.getBoundingClientRect().top <= (window.innerHeight) && !item.classList.contains('animate'))
                 {
-                    element.innerText=++count;
-                }
-            }
-            const speed = 1500/target;
-            const interval = setInterval(updateCount, speed);
-            if (count >= target)
-            {
-                clearInterval(interval);
-            }
-        });
-    }
-    const handleScroll = () => {
-        let scroll_position = window.innerHeight;
-        let elements = document.getElementsByClassName('fadeUp')
-        var isMobile = navigator.userAgent.toLowerCase().match(/mobile/i),
-        isTablet = navigator.userAgent.toLowerCase().match(/tablet/i),
-        isAndroid = navigator.userAgent.toLowerCase().match(/android/i),
-        isiPhone = navigator.userAgent.toLowerCase().match(/iphone/i),
-        isiPad = navigator.userAgent.toLowerCase().match(/ipad/i);
-        if (isMobile || isTablet || isAndroid || isiPhone || isiPad )
-        {
-            for (let index = 0; index < 3; index++)
-            {
-                if (!animated[index]) 
-                {
-                    elements[index].classList.remove('fadeUp');
-                    const newAnimated = [...animated];
-                    newAnimated[index] = true;
-                    setTruth(newAnimated);
-                    if (elements[index].classList.contains('about-stats'))
-                    {
-                        animate_counter();
-                    }
-                }   
-            }
-        }
-        else
-        {
-            for (let index = 0; index < 3; index++)
-            {
-                let element_position = elements[index].getBoundingClientRect().top;
-                if (element_position < scroll_position && !animated[index]) 
-                {
-                    elements[index].classList.add('animate');
-                    const newAnimated = [...animated];
-                    newAnimated[index] = true;
-                    setTruth(newAnimated);
-                    if (elements[index].classList.contains('about-stats'))
-                    {
-                        animate_counter();
+                    item.classList.add('animate');
+                    if(item.classList.contains('about-stats')){
+                        var elements = document.querySelectorAll('.count');
+                        elements.forEach(element => {
+                            let target = parseInt(element.innerHTML);
+                            let count = 0;
+                            let speed = 2000/target;
+                            let inc = (target > 127) ? 5 : 1;
+                            let id = null;
+                            let updateCount = () => {
+                                if(count < target)
+                                {
+                                    count+=inc;
+                                    element.innerHTML=count;
+                                }
+                                else {
+                                    clearInterval(id);
+                                    element.innerHTML=target;
+                                }
+                            }
+                            id = setInterval(updateCount, speed);
+                        });
                     }
                 }
-            }
+
+            })
         }
-    }
-    window.addEventListener('scroll', debounce(handleScroll, ));
+        window.addEventListener('scroll', fadeAnimation);
+        window.addEventListener('load', fadeAnimation);
+        return _ => {
+            window.removeEventListener('scroll', fadeAnimation);
+            window.addEventListener('load', fadeAnimation);
+        };
+    })
     return ( 
         <section className="about" id="about">
             <div className="about-header about-row fadeUp">
